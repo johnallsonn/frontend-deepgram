@@ -5,13 +5,13 @@ pipeline {
         // Define your credentials and environmental variables in Jenkins Global Configuration
         SSH_CREDENTIAL_ID = 'ResearchQuest-chatbot' // Jenkins Credential ID for EC2 SSH
         EC2_USER = 'ubuntu'             // Default user for Ubuntu EC2
-        EC2_IP = 34.233.64.193    // Placeholder for EC2 Public IP
+        EC2_IP = '34.233.64.193'    // Placeholder for EC2 Public IP
         DEPLOY_PATH = '/home/ubuntu/deepgram_agent' // Destination path on EC2
 
         // LiveKit Credentials (should be configured as 'Secret text' in Jenkins)
-        LIVEKIT_URL=wss://voice-bot-8dalwdwj.livekit.cloud
-        LIVEKIT_API_KEY=APItCQ8EHFQrey4
-        LIVEKIT_API_SECRET=BjXbwSCOqlC3D2rahHStXN7mldzKw3TzkfDZqbLcoPB
+        LIVEKIT_URL = 'wss://voice-bot-8dalwdwj.livekit.cloud'
+        LIVEKIT_API_KEY = 'APItCQ8EHFQrey4'
+        LIVEKIT_API_SECRET = 'BjXbwSCOqlC3D2rahHStXN7mldzKw3TzkfDZqbLcoPB'
     }
 
     stages {
