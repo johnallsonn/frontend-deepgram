@@ -9,9 +9,9 @@ pipeline {
         DEPLOY_PATH = '/home/ubuntu/deepgram_agent' // Destination path on EC2
 
         // LiveKit Credentials (should be configured as 'Secret text' in Jenkins)
-        LIVEKIT_URL = credentials('LIVEKIT_URL')
-        LIVEKIT_API_KEY = credentials('LIVEKIT_API_KEY')
-        LIVEKIT_API_SECRET = credentials('LIVEKIT_API_SECRET')
+        LIVEKIT_URL=wss://voice-bot-8dalwdwj.livekit.cloud
+        LIVEKIT_API_KEY=APItCQ8EHFQrey4
+        LIVEKIT_API_SECRET=BjXbwSCOqlC3D2rahHStXN7mldzKw3TzkfDZqbLcoPB
     }
 
     stages {
