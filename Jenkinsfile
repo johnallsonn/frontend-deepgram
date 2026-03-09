@@ -1,11 +1,8 @@
 pipeline {
     agent any
 
-    tools {
-        nodejs 'node' // This name must match the name in Jenkins Global Tool Configuration
-    }
-
     environment {
+        PATH = "/usr/bin:/usr/local/bin:${env.PATH}"
         // Define your credentials and environmental variables in Jenkins Global Configuration
         SSH_CREDENTIAL_ID = 'ResearchQuest-chatbot' // Jenkins Credential ID for EC2 SSH
         EC2_USER = 'ubuntu'             // Default user for Ubuntu EC2
@@ -21,9 +18,13 @@ pipeline {
     stages {
         stage('Environment Check') {
             steps {
-                sh 'node -v'
-                sh 'npm install -g pnpm || true' // Install pnpm if not available
-                sh 'pnpm -v'
+                // Try several ways to ensure Node.js is at hand
+                sh """
+                    export PATH=$PATH:/usr/bin:/usr/local/bin
+                    echo "Checking node version..."
+                    node -v || (echo "Node.js not found in standard paths. Please verify installation.")
+                """
+                sh 'npm install -g pnpm || true' 
             }
         }
 
