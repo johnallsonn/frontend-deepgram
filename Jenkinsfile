@@ -24,13 +24,17 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh 'pnpm install'
+                dir('agent-starter-react-main') {
+                    sh 'pnpm install'
+                }
             }
         }
 
         stage('Build') {
             steps {
-                sh 'pnpm build'
+                dir('agent-starter-react-main') {
+                    sh 'pnpm build'
+                }
             }
         }
 
@@ -41,7 +45,7 @@ pipeline {
                     sh "ssh -o StrictHostKeyChecking=no ${env.EC2_USER}@${env.EC2_IP} 'mkdir -p ${env.DEPLOY_PATH}'"
 
                     // 2. Transfer files using rsync
-                    sh "rsync -avz -e 'ssh -o StrictHostKeyChecking=no' --exclude 'node_modules' --exclude '.git' ./ ${env.EC2_USER}@${env.EC2_IP}:${env.DEPLOY_PATH}/"
+                    sh "rsync -avz -e 'ssh -o StrictHostKeyChecking=no' --exclude 'node_modules' --exclude '.git' agent-starter-react-main/ ${env.EC2_USER}@${env.EC2_IP}:${env.DEPLOY_PATH}/"
 
                     // 3. Create .env file on the server and restart with PM2
                     sh """
