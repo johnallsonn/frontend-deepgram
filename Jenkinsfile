@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    tools {
+        nodejs 'node' // This name must match the name in Jenkins Global Tool Configuration
+    }
+
     environment {
         // Define your credentials and environmental variables in Jenkins Global Configuration
         SSH_CREDENTIAL_ID = 'ResearchQuest-chatbot' // Jenkins Credential ID for EC2 SSH
@@ -18,6 +22,7 @@ pipeline {
         stage('Environment Check') {
             steps {
                 sh 'node -v'
+                sh 'npm install -g pnpm || true' // Install pnpm if not available
                 sh 'pnpm -v'
             }
         }
