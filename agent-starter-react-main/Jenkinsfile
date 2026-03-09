@@ -1,0 +1,71 @@
+pipeline {
+    agent any
+
+    environment {
+        // Define your credentials and environmental variables in Jenkins Global Configuration
+        SSH_CREDENTIAL_ID = 'ResearchQuest-chatbot' // Jenkins Credential ID for EC2 SSH
+        EC2_USER = 'ubuntu'             // Default user for Ubuntu EC2
+        EC2_IP = 34.233.64.193    // Placeholder for EC2 Public IP
+        DEPLOY_PATH = '/home/ubuntu/deepgram_agent' // Destination path on EC2
+
+        // LiveKit Credentials (should be configured as 'Secret text' in Jenkins)
+        LIVEKIT_URL = credentials('LIVEKIT_URL')
+        LIVEKIT_API_KEY = credentials('LIVEKIT_API_KEY')
+        LIVEKIT_API_SECRET = credentials('LIVEKIT_API_SECRET')
+    }
+
+    stages {
+        stage('Environment Check') {
+            steps {
+                sh 'node -v'
+                sh 'pnpm -v'
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                sh 'pnpm install'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'pnpm build'
+            }
+        }
+
+        stage('Deploy to EC2') {
+            steps {
+                sshagent([env.SSH_CREDENTIAL_ID]) {
+                    // 1. Create directory if it doesn't exist
+                    sh "ssh -o StrictHostKeyChecking=no ${env.EC2_USER}@${env.EC2_IP} 'mkdir -p ${env.DEPLOY_PATH}'"
+
+                    // 2. Transfer files using rsync
+                    sh "rsync -avz -e 'ssh -o StrictHostKeyChecking=no' --exclude 'node_modules' --exclude '.git' ./ ${env.EC2_USER}@${env.EC2_IP}:${env.DEPLOY_PATH}/"
+
+                    // 3. Create .env file on the server and restart with PM2
+                    sh """
+                        ssh -o StrictHostKeyChecking=no ${env.EC2_USER}@${env.EC2_IP} '
+                            cd ${env.DEPLOY_PATH} && \
+                            echo \"LIVEKIT_URL=${env.LIVEKIT_URL}\" > .env && \
+                            echo \"LIVEKIT_API_KEY=${env.LIVEKIT_API_KEY}\" >> .env && \
+                            echo \"LIVEKIT_API_SECRET=${env.LIVEKIT_API_SECRET}\" >> .env && \
+                            pnpm install --prod && \
+                            pm2 delete frontend || true && \
+                            pm2 start pnpm --name \"frontend\" -- start
+                        '
+                    """
+                }
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Deployment successful!'
+        }
+        failure {
+            echo 'Deployment failed. Check Jenkins logs for details.'
+        }
+    }
+}
