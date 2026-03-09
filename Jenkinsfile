@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    tools {
+        nodejs 'node' // Ensure this matches the name in Jenkins Global Tool Configuration
+    }
+
     environment {
         PATH = "/usr/bin:/usr/local/bin:${env.PATH}"
         // Define your credentials and environmental variables in Jenkins Global Configuration
@@ -18,13 +22,9 @@ pipeline {
     stages {
         stage('Environment Check') {
             steps {
-                // Try several ways to ensure Node.js is at hand
-                sh """
-                    export PATH=$PATH:/usr/bin:/usr/local/bin
-                    echo "Checking node version..."
-                    node -v || (echo "Node.js not found in standard paths. Please verify installation.")
-                """
+                sh 'node -v'
                 sh 'npm install -g pnpm || true' 
+                sh 'pnpm -v'
             }
         }
 
